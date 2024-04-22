@@ -1,0 +1,26 @@
+{
+  "name": "e-com-server",
+  "version": "1.0.0",
+  "description": "e-commerce server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Acmeflaretec/E-com-Server.git"
+  },
+  "author": "Abhijith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Acmeflaretec/E-com-Server/issues"
+  },
+  "homepage": "https://github.com/Acmeflaretec/E-com-Server#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.2",
+    "morgan": "^1.10.0"
+  }
+}
