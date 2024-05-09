@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router = Router();
 
-import { signup, verifySignup, getCurrentUser, signin } from "../Controllers/authController";
+import { signup, verifySignup, getCurrentUser, signin } from "../controllers/authController";
 import authorization from "../middlewares/authorization";
 
 router.post("/v1/user/register", signup);
