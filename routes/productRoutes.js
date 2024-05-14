@@ -1,14 +1,13 @@
-import { Router } from "express";
+const { Router } = require('express');
 const router = Router();
+const authorization = require("../middlewares/authorization");
+const { addProduct, getProducts, deleteProduct } = require('../controllers/productController');
+const { upload } = require('../middlewares/multer');
 
-import { signup, verifySignup, getCurrentUser, signin } from "../controllers/authController";
-import authorization from "../middlewares/authorization";
+router.post('/', authorization, upload.array('images', 10), addProduct);
+router.get('/', getProducts);
+router.delete('/:id', authorization, deleteProduct);
+// router.get('/:id', findOneProduct);
+// router.patch('/:id',authorization, updateProduct);
 
-router.post("/v1/products",authorization, addProduct);
-router.get("/v1/products", getProducts);
-router.get("/v1/products/:id", findOneProduct);
-router.patch("/v1/products/:id",authorization, updateProduct);
-router.post("/v1/category",authorization, addCategory);
-router.patch("/v1/category/:id",authorization, updateCategory);
-
-export default router;
+module.exports = router;

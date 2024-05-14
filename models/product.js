@@ -1,39 +1,63 @@
 const mongoose = require('mongoose')
 const productSchema = new mongoose.Schema({
 
-    name:{
-        type:String,
+    name: {
+        type: String,
+        required: true
+    },
+    subheading: {
+        type: String,
+        required: true
+    },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Category"
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    brand: {
+        type: String
+    },
+    tags: {
+        type: String,
+        enum: ["featured", "popular", "limited_time_deal", "most_loved"]
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    stock: {
+        type: Number,
+        required: true
+    },
+    discount: {
+        type: Number,
+        required: true
+    },
+    sale_rate: {
+        type: Number,
+        required: true
+    },
+    image: {
+        type: Array,
         required:true
     },
-    category:{
-        type:String,
-        required:true
+    isAvailable: {
+        type: Boolean,
+        default: true
     },
-    description:{
-        type:String,
-        required:true
+    rating: {
+        type: Number,
+        default: 0
     },
-    price:{
-        type:Number,
-        required:true
-    },
-    stock:{
-        type:Number,
-        required:true
-    },
-    image:{
-        type:Array,
-    },
-    isAvailable:{
-        type:Number,
-        default:1
-    },
-    star:{
-        type:Number,
-        default:0
-    },
-    Rating:{
-        type:Array
+    reviews: {
+        type: Array
     }
+},
+{
+    timestamps: true
 })
-module.exports = mongoose.model('Product',productSchema)
+module.exports = mongoose.model('Product', productSchema)

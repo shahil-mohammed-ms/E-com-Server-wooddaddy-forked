@@ -1,12 +1,14 @@
-import express from 'express'
-import cors from "cors";
-import router from "./routes/index.js";
-import morgan, { token } from "morgan";
+const express = require('express');
+const cors = require('cors');
+const router = require('./routes/index.js');
+const morgan = require('morgan');
+const path = require('path')
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-token("custom-date", (req, res) => {
+app.use(express.static(path.join(__dirname, ('./public'))))
+morgan.token("custom-date", (req, res) => {
   return new Date().toUTCString();
 });
 app.use(
@@ -15,6 +17,6 @@ app.use(
   )
 );
 console.log(morgan);
-app.use(router);
+app.use('/api',router);
 
-export default app;
+module.exports = app;
