@@ -17,7 +17,7 @@ const addAdvertisement = async (req, res) => {
      
       const adv = new Banner({offer,title, subtitle, imgUrl })
       await adv.save()
-      res.status(201).json({ data: ban, message: 'advertisement created successfully' });
+      res.status(201).json({ data: adv, message: 'advertisement created successfully' });
      
   } catch (error) {
     console.log(error);
