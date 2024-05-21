@@ -57,11 +57,35 @@ const deleteBannerById = async (req, res) => {
   }
 };
 
+const updateBannerById = async (req, res) => {
+  const { id } = req.params;
+  const { title, subtitle } = req.body;
+  const imgUrl = req.file?.filename;
+
+  try {
+    const banner = await Banner.findById(id);
+    if (!banner) {
+      return res.status(404).json({ message: 'Banner not found' });
+    }
+
+    if (title) banner.title = title;
+    if (subtitle) banner.subtitle = subtitle;
+    if (imgUrl) banner.imgUrl = imgUrl;
+
+    await banner.save();
+    res.status(200).json({ data: banner, message: 'Banner updated successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'An error occurred', error });
+  }
+};
+
 
 module.exports = {
   getBanners,
   addBanner,
 getBannerById,
-deleteBannerById
+deleteBannerById,
+updateBannerById
 
 }
