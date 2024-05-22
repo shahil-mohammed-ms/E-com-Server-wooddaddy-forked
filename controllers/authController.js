@@ -1,49 +1,48 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
-const signup = async(req,res) => {
+const signup = async (req, res) => {
+  const { firstName, lastName, password, phone, mail } = req.body;
 
-  const { firstName,lastName,password,imgUrl,phone,mail, } = req?.body
-try {
-  const existingUser = User.findOne({mail});
+  try {
+    // Check if the user already exists
+    const existingUser = await User.findOne({ mail });
 
-  if(existingUser) res.status(409).json({proceed:false,data:{},message:'failed to signup '});
+    if (existingUser) {
+      return res.status(409).json({ proceed: false, data: {}, message: 'Failed to signup: Email already in use' });
+    }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = new User({
-    firstName,
-    lastName,
-    password: hashedPassword,
-    imgUrl,
-    phone,
-    mail,
-  });
+    // Create a new user
+    const newUser = new User({
+      firstName,
+      lastName,
+      password: hashedPassword,
+      phone,
+      mail,
+    });
 
-  await newUser.save();
+    await newUser.save();
 
-  // const { password: _, ...userWithoutPassword } = newUser.toObject();
+    // Destructure newUser to remove password
+    const { password: _, ...userWithoutPassword } = newUser.toObject();
 
-  // res.status(201).json({ proceed: true, data: userWithoutPassword, message: 'Signup successful' });
+    res.status(201).json({ proceed: true, data: userWithoutPassword, message: 'Signup successful' });
 
-  res.status(201).json({ proceed: true, data: newUser, message: 'Signup successful' });
-
-} catch (error) {
-
-  res.status(500).json({ proceed: false, data: {}, message: 'An error occurred during signup' });
-  
-}
- 
-
-}
-
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ proceed: false, data: {}, message: 'An error occurred during signup' });
+  }
+};
 const signin = async (req,res) => {
 
   const {password,mail} = req?.body
 
 try {
 
-  const existingUser = User.findOne({mail});
+  const existingUser =await  User.findOne({mail});
   if (!existingUser)     return res.status(401).json({ message: "Invalid email or password" });
 
   const passwordMatch = await bcrypt.compare(

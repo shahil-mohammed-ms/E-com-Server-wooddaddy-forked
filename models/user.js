@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
 
 imgUrl:{
   type:String,
-  required:true
+  required:false
 
 },
 phone:{
@@ -35,16 +35,19 @@ mail:{
 },
 address:{
   type:String,
-
+  required:false
 },
 cart:{
   type:Array,
+  required:false
 },
 wishlist:{
   type:Array,
+  required:false
 },
 order:{
   type:Array,
+  required:false
 },
 
 })
