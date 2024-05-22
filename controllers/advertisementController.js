@@ -44,7 +44,7 @@ const deleteAdvertisementById = async (req, res) => {
   const { id } = req.params;
   try {
     const advertisement = await Advertisement.findByIdAndDelete(id);
-    if (!banner) {
+    if (!advertisement) {
       return res.status(404).json({ message: 'Banner not found' });
     }
     res.status(200).json({ message: 'Banner deleted successfully' });
