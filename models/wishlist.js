@@ -12,9 +12,9 @@ const wishlistSchema = new mongoose.Schema({
     ref: "Product"
 
   },
- folder:{
+  folderName:{
   type:String,
-  required:false
+  required:true
  }
 
 },

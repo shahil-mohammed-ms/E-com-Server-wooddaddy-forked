@@ -32,11 +32,11 @@ const addCart = async (req, res) => {
 };
 
 const removeCart = async (req, res) => {
-  const { proId } = req.params;
+  const { proId,userId } = req.params;
 
   try {
     // Find and remove the cart item by proId
-    const removedCart = await Cart.findOneAndRemove({ proId });
+    const removedCart = await Cart.findOneAndRemove({ proId,userId });
 
     if (!removedCart) {
       return res.status(404).json({ error: 'Cart item with the specified proId not found' });
