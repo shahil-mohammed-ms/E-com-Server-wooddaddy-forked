@@ -1,27 +1,52 @@
 const Cart = require('../models/cart');
 
-const getCart = async(req,res) =>{
+const getCart = async (req, res) => {
+  const { userId } = req.params;
 
-const {userId} = req.params
+  try {
+    // Find carts with the provided userId
+    const carts = await Cart.find({ userId }).populate('proId');
 
-//get carts with user id
-const cart = await Cart.find({userId})
-
-//get products details with the cart ids
-
-}
-
-const addCart = async (req,res) => {
-
-
-
-}
-
-const removeCart = async (req,res) => {
+    res.json({ carts });
+  } catch (error) {
+    res.status(500).json({ error: 'Could not retrieve carts' });
+  }
+};
 
 
+const addCart = async (req, res) => {
+  const { userId, proId } = req.params;
 
-}
+  try {
+    // Create a new cart entry
+    const newCart = await Cart.create({
+      userId: userId,
+      proId: proId,
+      
+    });
+
+    res.status(201).json({ message: 'Cart entry created successfully', cart: newCart });
+  } catch (error) {
+    res.status(500).json({ error: 'Could not create cart entry' });
+  }
+};
+
+const removeCart = async (req, res) => {
+  const { proId } = req.params;
+
+  try {
+    // Find and remove the cart item by proId
+    const removedCart = await Cart.findOneAndRemove({ proId });
+
+    if (!removedCart) {
+      return res.status(404).json({ error: 'Cart item with the specified proId not found' });
+    }
+
+    res.json({ message: 'Cart item removed successfully', removedCart });
+  } catch (error) {
+    res.status(500).json({ error: 'Could not remove cart item' });
+  }
+};
 
 const updateCart = async (req,res) => {
 
