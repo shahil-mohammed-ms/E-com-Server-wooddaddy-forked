@@ -11,7 +11,7 @@ const Product = require('../models/product');
 
 const getProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, sortField, sortOrder, search, category } = req.query;
+    const { page = 1, limit = 10, sortField, sortOrder, search, category,priceGreaterThan, priceLessThan, priceMin, priceMax } = req.query;
 
     // Construct the base query
     const query = {};
@@ -36,6 +36,23 @@ const getProducts = async (req, res) => {
     if (sortField && sortOrder) {
       sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
     }
+
+   // Price greater than functionality
+   if (priceGreaterThan) {
+    query.sale_rate = { $gt: parseInt(priceGreaterThan) };
+  }
+
+  // Price less than functionality
+  if (priceLessThan) {
+    query.sale_rate = { $lt: parseInt(priceLessThan) };
+  }
+
+  // Price range functionality
+  if (priceMin && priceMax) {
+    query.sale_rate = { $gte: parseInt(priceMin), $lte: parseInt(priceMax) };
+  }
+
+
 
     // Find products based on the constructed query
     const products = await Product.find(query)
