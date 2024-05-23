@@ -1,13 +1,57 @@
 const Product = require('../models/product');
 
+// const getProducts = async (req, res) => {
+//   try {
+//     const data = await Product.find()
+//     res.status(200).json({ data })
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
 const getProducts = async (req, res) => {
   try {
-    const data = await Product.find()
-    res.status(200).json({ data })
+    const { page = 1, limit = 10, sortField, sortOrder, search, category } = req.query;
+
+    // Construct the base query
+    const query = {};
+
+    // Search functionality
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { brand: searchRegex }
+        // Add additional fields for search as needed
+      ];
+    }
+
+    // Category filter
+    if (category) {
+      query.category = category;
+    }
+
+    // Sorting
+    const sortOptions = {};
+    if (sortField && sortOrder) {
+      sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+    }
+
+    // Find products based on the constructed query
+    const products = await Product.find(query)
+      .collation({ locale: 'en' }) // Enable case-insensitive search
+      .sort(sortOptions)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.status(200).json({ products });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: 'An error occurred while fetching products' });
   }
 };
+
+
 
 const addProduct = async (req, res) => {
   try {
