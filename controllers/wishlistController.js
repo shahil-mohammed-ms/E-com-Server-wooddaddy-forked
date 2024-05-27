@@ -66,7 +66,7 @@ const addWishlistItem = async (req, res) => {
       folderName
     });
 
-    res.status(201).json({ message: 'Wishlist item added successfully', wishlistItem: newWishlistItem });
+    res.status(201).json({ message: 'Wishlist item added successfully', wishlistItem: newWishlistItem,added:true });
   } catch (error) {
     res.status(500).json({ error: 'Could not add wishlist item' });
   }
@@ -74,17 +74,20 @@ const addWishlistItem = async (req, res) => {
 
 const removeWishlistItem = async (req, res) => {
   const { proId, userId,folderName } = req.params;
-
+ 
   try {
     // Find and remove the wishlist item by proId and userId
-    const removedWishlistItem = await Wishlist.findOneAndRemove({ proId, userId,folderName });
+    const removedWishlistItem = await Wishlist.findOneAndDelete({ proId, userId,folderName });
 
+
+    console.log('rem',removeWishlistItem)
     if (!removedWishlistItem) {
       return res.status(404).json({ error: 'Wishlist item with the specified proId not found' });
     }
 
-    res.json({ message: 'Wishlist item removed successfully', removedWishlistItem });
+    res.json({ message: 'Wishlist item removed successfully', removedWishlistItem ,added:false });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Could not remove wishlist item' });
   }
 };

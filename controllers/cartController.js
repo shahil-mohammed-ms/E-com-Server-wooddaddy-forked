@@ -11,8 +11,7 @@ const getCart = async (req, res) => {
 
    try {
     const { userId } = req.params;
-    const { page = 1, limit = 10, sortField, sortOrder, search, category,
-      priceGreaterThan, priceLessThan, priceMin, priceMax,sortDiscount,sortDiscountGreaterThan   } = req.query;
+    const { page = 1, limit = 10, sortField, sortOrder,   } = req.query;
 
     // Construct the base query
     const query = {};
