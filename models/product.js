@@ -18,6 +18,21 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    specification:{
+        type: String,
+        required: false
+
+    },
+    dimension:{
+        type: String,
+        required: false
+
+    },
+    warranty:{
+        type: String,
+        required: false
+
+    },
     brand: {
         type: String
     },

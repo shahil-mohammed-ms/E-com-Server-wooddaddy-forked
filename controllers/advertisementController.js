@@ -10,12 +10,12 @@ const getAdvertisement = async (req, res) => {
 };
 
 const addAdvertisement = async (req, res) => {
-  console.log(req)
-  const { title, subtitle } = req?.body
+   
+  const {offer, title, subtitle } = req?.body
   const imgUrl = req?.file?.filename
   try {
      
-      const adv = new Banner({offer,title, subtitle, imgUrl })
+      const adv = new Advertisement({offer,title, subtitle, imgUrl })
       await adv.save()
       res.status(201).json({ data: adv, message: 'advertisement created successfully' });
      

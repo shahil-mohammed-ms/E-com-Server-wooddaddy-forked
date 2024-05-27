@@ -3,7 +3,7 @@ const advertisementSchema = mongoose.Schema({
 
   offer:{
 
-    type:String,
+    type:Number,
     required:true
     
     },

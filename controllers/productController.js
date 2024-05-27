@@ -1,17 +1,37 @@
 const Product = require('../models/product');
+const Wishlist = require('../models/wishlist');
+const Cart = require('../models/cart');
 
-// const getProducts = async (req, res) => {
-//   try {
-//     const data = await Product.find()
-//     res.status(200).json({ data })
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+const getProduct = async (req, res) => {
+  const { proId } = req.params;
+
+  try {
+    const product = await Product.findById(proId); // Fetch the product using the provided proId
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const wishlistExists = await Wishlist.exists({ userId: '664db80748eeadcd76759a55', proId: proId });
+    const cartExists = await Cart.exists({ userId: '664db80748eeadcd76759a55', proId: proId });
+
+    const productWithExtras = {
+      ...product._doc,
+      inWishlist: wishlistExists,
+      inCart: cartExists,
+    };
+
+    res.status(200).json({ product: productWithExtras }); // Send back the product with additional data
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while fetching the product' });
+  }
+};
+
 
 const getProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, sortField, sortOrder, search, category,priceGreaterThan, priceLessThan, priceMin, priceMax } = req.query;
+    const { page = 1, limit = 10, sortField, sortOrder, search, category,
+      priceGreaterThan, priceLessThan, priceMin, priceMax,sortDiscount,sortDiscountGreaterThan   } = req.query;
 
     // Construct the base query
     const query = {};
@@ -52,7 +72,14 @@ const getProducts = async (req, res) => {
     query.sale_rate = { $gte: parseInt(priceMin), $lte: parseInt(priceMax) };
   }
 
+  if (sortDiscount) {
+    query.discount = parseInt(sortDiscount);
+  }
 
+  // Sort by discount greater than functionality
+  if (sortDiscountGreaterThan) {
+    query.discount = { $gt: parseInt(sortDiscountGreaterThan) };
+  }
 
     // Find products based on the constructed query
     const products = await Product.find(query)
@@ -61,7 +88,20 @@ const getProducts = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(Number(limit));
 
-    res.status(200).json({ products });
+    // Fetch wishlist and cart details for each product
+    const productsWithData = await Promise.all(products.map(async (product) => {
+      const wishlistExists = await Wishlist.exists({ userId: '664db80748eeadcd76759a55', proId: product._id });
+      const cartExists = await Cart.exists({ userId: '664db80748eeadcd76759a55', proId: product._id });
+
+      return {
+        ...product._doc,
+        inWishlist: wishlistExists,
+        inCart: cartExists,
+      };
+    }));
+
+
+    res.status(200).json({ products: productsWithData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'An error occurred while fetching products' });
@@ -73,10 +113,10 @@ const getProducts = async (req, res) => {
 const addProduct = async (req, res) => {
   try {
     console.log(req.files);
-    const { name, subheading, category, brand, price, stock, discount, sale_rate, description } = req?.body
+    const { name, subheading, category, brand, price, stock, discount, sale_rate, description,specification,dimension,warranty } = req?.body
     if (req.files.length != 0) {
       const product =new Product({
-        name, subheading, category, brand, price, stock, discount, sale_rate, description,
+        name, subheading, category, brand, price, stock, discount, sale_rate, description,specification,dimension,warranty,
         image: req.files.map((x) => x.filename)
       });
       console.log(product);
@@ -132,22 +172,28 @@ const editProduct = async (req, res) => {
       const newImg = req.files.map((x) => x.filename)
       const images = oldImg.concat(newImg)
       console.log(images);
-      product = await Product.updateOne({ _id: req.query.id }, {
+    const  product = await Product.updateOne({ _id: req.query.id }, {
         $set: {
           name: req.body.name,
           price: req.body.price,
           description: req.body.description,
+          specification:req.body.specification,
+          dimension:req.body.dimension,
+          warranty:req.body.warranty,
           stock: req.body.stock,
           category: req.body.category,
           image: images
         }
       })
     } else {
-      product = await Product.updateOne({ _id: req.query.id }, {
+     const product = await Product.updateOne({ _id: req.query.id }, {
         $set: {
           name: req.body.name,
           price: req.body.price,
           description: req.body.description,
+          specification:req.body.specification,
+          dimension:req.body.dimension,
+          warranty:req.body.warranty,
           stock: req.body.stock,
           category: req.body.category,
         }
@@ -175,6 +221,7 @@ const deleteProduct = async (req, res) => {
   }
 }
 module.exports = {
+  getProduct,
   editProduct,
   updateImage,
   uploadImage,

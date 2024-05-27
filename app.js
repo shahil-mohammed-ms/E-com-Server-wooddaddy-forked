@@ -7,9 +7,16 @@ const path = require('path')
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
+// app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:3000', // This is the origin of the request (your React frontend URL)
+  credentials: true, // Indicates whether or not the response to the request can be exposed when the credentials flag is true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, ('./public'))))
+//app.use(express.static(path.join(__dirname, ('./public'))))
+app.use(express.static(path.join(__dirname, "./middlewares/public")));
 morgan.token("custom-date", (req, res) => {
   return new Date().toUTCString();
 });
