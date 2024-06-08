@@ -10,7 +10,7 @@ const getBanners = async (req, res) => {
 };
 
 const addBanner = async (req, res) => {
-  console.log(req)
+  console.log('banner det ',req.body)
   const { title, subtitle } = req?.body
   const imgUrl = req?.file?.filename
   try {

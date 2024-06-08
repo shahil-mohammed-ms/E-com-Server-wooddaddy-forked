@@ -48,11 +48,9 @@ const getCart = async (req, res) => {
           inCart: cartExists,
         };
       }));
-      console.log('productsWithData:', productsWithData);
+      console.log('productsWithData :', productsWithData);
       res.status(200).json({ products: productsWithData });
 
- 
-//     res.json({ products: wishlistItems });
   } catch (error) {
     console.log('errrr',error)
     res.status(500).json({ error: 'Could not retrieve wishlist items' });
@@ -83,7 +81,7 @@ const addCart = async (req, res) => {
 const removeCart = async (req, res) => {
   const { proId,userId } = req.params;
 
-  try {
+  try { 
     // Find and remove the cart item by proId
     const removedCart = await Cart.findOneAndDelete({ proId,userId });
 
