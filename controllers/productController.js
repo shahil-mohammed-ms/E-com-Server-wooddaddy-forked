@@ -28,10 +28,96 @@ const getProduct = async (req, res) => {
 };
 
 
+// const getProducts = async (req, res) => {
+//   try {
+//     const { page = 1, limit = 10, sortField, sortOrder, search, category,
+//       priceGreaterThan, priceLessThan, priceMin, priceMax,sortDiscount,sortDiscountGreaterThan   } = req.query;
+
+//     // Construct the base query
+//     const query = {};
+
+//     // Search functionality
+//     if (search) {
+//       const searchRegex = new RegExp(search, 'i');
+//       query.$or = [
+//         { name: searchRegex },
+//         { brand: searchRegex }
+//         // Add additional fields for search as needed
+//       ];
+//     }
+
+//     // Category filter
+//     if (category) {
+//       query.category = category;
+//     }
+
+//     // Sorting
+//     const sortOptions = {};
+//     if (sortField && sortOrder) {
+//       sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+//     }
+
+//    // Price greater than functionality
+//    if (priceGreaterThan) {
+//     query.sale_rate = { $gt: parseInt(priceGreaterThan) };
+//   }
+
+//   // Price less than functionality
+//   if (priceLessThan) {
+//     query.sale_rate = { $lt: parseInt(priceLessThan) };
+//   }
+
+//   // Price range functionality
+//   if (priceMin && priceMax) {
+//     query.sale_rate = { $gte: parseInt(priceMin), $lte: parseInt(priceMax) };
+//   }
+
+//   if (sortDiscount) {
+//     query.discount = parseInt(sortDiscount);
+//   }
+
+//   // Sort by discount greater than functionality
+//   if (sortDiscountGreaterThan) {
+//     query.discount = { $gt: parseInt(sortDiscountGreaterThan) };
+//   }
+
+//     // Find products based on the constructed query
+//     const products = await Product.find(query)
+//       .collation({ locale: 'en' }) // Enable case-insensitive search
+//       .sort(sortOptions)
+//       .skip((page - 1) * limit)
+//       .limit(Number(limit));
+
+//     // Fetch wishlist and cart details for each product
+//     const productsWithData = await Promise.all(products.map(async (product) => {
+//       const wishlistExists = await Wishlist.exists({ userId: '664db80748eeadcd76759a55', proId: product._id });
+//       const cartExists = await Cart.exists({ userId: '664db80748eeadcd76759a55', proId: product._id });
+
+//       return {
+//         ...product._doc,
+//         inWishlist: wishlistExists,
+//         inCart: cartExists,
+//       };
+//     }));
+
+
+//     res.status(200).json({ products: productsWithData });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: 'An error occurred while fetching products' });
+//   }
+// };
+
 const getProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, sortField, sortOrder, search, category,
-      priceGreaterThan, priceLessThan, priceMin, priceMax,sortDiscount,sortDiscountGreaterThan   } = req.query;
+    const { page = 1, limit = 3, sortField, sortOrder, search, category,
+      priceGreaterThan, priceLessThan, priceMin, priceMax, sortDiscount, sortDiscountGreaterThan } = req.query;
+
+    // Convert page and limit to integers
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+// console.log('lim',limit)
+console.log('lim n',limitNumber)
 
     // Construct the base query
     const query = {};
@@ -57,36 +143,38 @@ const getProducts = async (req, res) => {
       sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
     }
 
-   // Price greater than functionality
-   if (priceGreaterThan) {
-    query.sale_rate = { $gt: parseInt(priceGreaterThan) };
-  }
+    // Price greater than functionality
+    if (priceGreaterThan) {
+      query.sale_rate = { $gt: parseInt(priceGreaterThan) };
+    }
 
-  // Price less than functionality
-  if (priceLessThan) {
-    query.sale_rate = { $lt: parseInt(priceLessThan) };
-  }
+    // Price less than functionality
+    if (priceLessThan) {
+      query.sale_rate = { $lt: parseInt(priceLessThan) };
+    }
 
-  // Price range functionality
-  if (priceMin && priceMax) {
-    query.sale_rate = { $gte: parseInt(priceMin), $lte: parseInt(priceMax) };
-  }
+    // Price range functionality
+    if (priceMin && priceMax) {
+      query.sale_rate = { $gte: parseInt(priceMin), $lte: parseInt(priceMax) };
+    }
 
-  if (sortDiscount) {
-    query.discount = parseInt(sortDiscount);
-  }
+    if (sortDiscount) {
+      query.discount = parseInt(sortDiscount);
+    }
 
-  // Sort by discount greater than functionality
-  if (sortDiscountGreaterThan) {
-    query.discount = { $gt: parseInt(sortDiscountGreaterThan) };
-  }
+    // Sort by discount greater than functionality
+    if (sortDiscountGreaterThan) {
+      query.discount = { $gt: parseInt(sortDiscountGreaterThan) };
+    }
 
     // Find products based on the constructed query
+    const totalProducts = await Product.countDocuments(query);
+    console.log('tpro',totalProducts)
     const products = await Product.find(query)
       .collation({ locale: 'en' }) // Enable case-insensitive search
       .sort(sortOptions)
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
 
     // Fetch wishlist and cart details for each product
     const productsWithData = await Promise.all(products.map(async (product) => {
@@ -100,8 +188,7 @@ const getProducts = async (req, res) => {
       };
     }));
 
-
-    res.status(200).json({ products: productsWithData });
+    res.status(200).json({ totalProducts, products: productsWithData, totalPages: Math.ceil(totalProducts / limitNumber) });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'An error occurred while fetching products' });
