@@ -99,6 +99,7 @@ const addItemToOrder = async (req, res) => {
         productId,
         quantity,
         price:price,
+        totalAmount :price*quantity
       });
 
       const savedOrderItem = await newOrderItem.save();
@@ -107,8 +108,10 @@ const addItemToOrder = async (req, res) => {
     } else {
       // If the order item exists, update the quantity and total amount
       orderItem.quantity += quantity;
-      orderItem.price = price; // Assuming price might change, else remove this line
+      orderItem.price = price;
+      orderItem.totalAmount  = price*quantity;
 
+ 
       const updatedOrderItem = await orderItem.save();
       console.log('OrderItem updated')
       return res.status(200).json({ created: true, message: 'OrderItem updated', orderItem: updatedOrderItem });
@@ -148,6 +151,7 @@ const incrementOrderItemQuantity = async (req, res) => {
     }
 
     orderItem.quantity += 1;
+    orderItem.totalAmount =orderItem.price*orderItem.quantity
     const updatedOrderItem = await orderItem.save();
 
     res.status(200).json(updatedOrderItem);
@@ -170,6 +174,8 @@ const decrementOrderItemQuantity = async (req, res) => {
 
     if (orderItem.quantity > 1) {
       orderItem.quantity -= 1;
+      orderItem.totalAmount =orderItem.price*orderItem.quantity
+
       const updatedOrderItem = await orderItem.save();
       return res.status(200).json(updatedOrderItem);
     } else {

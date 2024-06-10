@@ -6,7 +6,8 @@ const OrderItemSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, required: true },
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
-  
+  totalAmount : { type: Number, required: true },
+
 },{
   timestamps: true
 });
