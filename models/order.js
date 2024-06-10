@@ -1,36 +1,57 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+ 
+const mongoose = require('mongoose')
 
-// Define the OrderItem schema
-
-
-// Define the Order schema
-const OrderSchema = new Schema({
-  orderId: { type: String, required: true, unique: true },
-  customer: {
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    address: { 
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      zip: { type: String, required: true },
+const orderSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    payment_mode: {
+        type: String,
+        required: true
+    },
+    Totalamount: {
+        type: Number,
+        required: true
+    },
+    address: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Address',
+        required: true
+    },
+    products: {
+        item: [{
+            product_id: {
+                type: mongoose.Types.ObjectId,
+                ref: 'Product',
+                required: true
+            },
+            qty: {
+                type: Number,
+                required: true
+            },
+            price: {
+                type: Number,
+            }
+        }],
+        totalPrice: {
+            type: Number,
+            default: 0
+        }
+    },
+    status: {
+        type: String,
+        enum: ["Pending", "Placed", "Shipped", "Out_of_delivery", "Delivered", "Delayed", "Canceled"],
+        default: "Placed"
+    },
+    offer: {
+        type: String,
+        default: "None"
     }
-  },
-  // items: [OrderItemSchema],
-  totalAmount: { type: Number, required: true },
-  status: { type: String, enum: ['pending', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+},
+    {
+        timestamps: true
+    })
 
-// Create a pre-save hook to update the 'updatedAt' field
-OrderSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
-
-// Compile the model from the schema
-const Order = mongoose.model('Order', OrderSchema);
-
-module.exports = Order;
+    module.exports = mongoose.model('Order', orderSchema)

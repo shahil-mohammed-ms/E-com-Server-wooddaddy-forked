@@ -1,133 +1,108 @@
 const Order = require('../models/order');
+const Address = require('../models/address');
+
 const OrderItem = require('../models/orderItem');
-const Product = require('../models/product');
-
-
-
-// Handle Buy Item (Create or Add Item to Order)
-const handleBuyItem = async (req, res) => {
-  try {
-    const { customerId, productId, quantity, price, customer } = req.body;
-
-    // Check for existing pending order for the customer
-    let order = await Order.findOne({ 'customer._id': customerId, status: 'pending' });
-
-    if (order) {
-      // If pending order exists, add item to the existing order
-      order.items.push({ productId, quantity, price });
-      order.totalAmount += quantity * price;
-    } else {
-      // If no pending order exists, create a new order
-      order = new Order({
-        orderId: `ORD-${Date.now()}`, // Generate a unique order ID
-        customer,
-        items: [{ productId, quantity, price }],
-        totalAmount: quantity * price,
-        status: 'pending'
-      });
-    }
-
-    const savedOrder = await order.save();
-    res.status(201).json(savedOrder);
-  } catch (error) {
-    res.status(500).json({ message: 'Error handling buy item', error });
-  }
-};
-
-
-
+const mongoose = require('mongoose');
+const Product = require('../models/product')
 
 // Create a new order
+// const createOrder = async (req, res) => {
+//   console.log('req .body ',req.body)
+//   try {
+//     const { userId,addressId } = req.params
+//     const {  Totalamount, products } = req.body;
+//     console.log('req.cartdetails ',req.body[0].cartDetails)
+//     // Validate the address
+//     const addressExists = await Address.findById(addressId);
+//     if (!addressExists) {
+//       return res.status(404).json({ message: 'Address not found' });
+//     }
+
+//      let totalPrice = 0;
+//     for (const item of req.body) {
+//       const product = await Product.findById(item._id);
+//       console.log('ppppp',product)
+//       if (!product) {
+//         return res.status(404).json({ message: `Product with id ${item.product_id} not found` });
+//       }
+//        item.price = product.sale_rate;
+//       totalPrice += item.qty * product.sale_rate;
+//     }
+
+//      const newOrder = new Order({
+//       userId,
+//       payment_mode:'COD',
+//       Totalamount,
+//       address:addressId,
+//       products: {
+//         item: products.item,
+//         totalPrice
+//       },
+//       status: 'Placed',
+//       offer: req.body.offer || "None"
+//     });
+
+//      const savedOrder = await newOrder.save();
+
+//     res.status(201).json(savedOrder);
+//   } catch (error) {
+//     console.log('Error creating order:', error);
+//     res.status(500).json({ message: 'Error creating order', error });
+//   }
+// };
 const createOrder = async (req, res) => {
   try {
-    const { orderId, customer, items, totalAmount, status } = req.body;
+    const { userId, addressId } = req.params;
+const {products } = req.body
+    // Validate the address
+    const addressExists = await Address.findById(addressId);
+    if (!addressExists) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+
+    let totalPrice = 0;
+    const items = [];
+    // for (const item of req.body) {
+    //   const product = await Product.findById(item._id);
+    //   if (!product) {
+    //     return res.status(404).json({ message: `Product with id ${item._id} not found` });
+    //   }
+    //   items.push({
+    //     product_id: product._id,
+    //     qty: item.qty,
+    //     price: product.sale_rate
+    //   });
+    //   totalPrice += item.qty * product.sale_rate;
+    // }
 
     const newOrder = new Order({
-      orderId,
-      customer,
-      items,
-      totalAmount,
-      status
+      userId,
+      payment_mode: 'COD',
+      Totalamount:10,
+      address: addressId,
+      products,
+      status: 'Placed',
+      offer: req.body.offer || "None"
     });
 
     const savedOrder = await newOrder.save();
+
     res.status(201).json(savedOrder);
   } catch (error) {
+    console.log('Error creating order:', error);
     res.status(500).json({ message: 'Error creating order', error });
   }
 };
 
-
-
-// Remove an item from an order
-const removeItemFromOrder = async (req, res) => {
-  try {
-    const { orderId, itemId } = req.params;
-
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-
-    const itemIndex = order.items.findIndex(item => item._id.toString() === itemId);
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: 'Item not found' });
-    }
-
-    const [removedItem] = order.items.splice(itemIndex, 1);
-    order.totalAmount -= removedItem.quantity * removedItem.price;
-    const updatedOrder = await order.save();
-
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    res.status(500).json({ message: 'Error removing item from order', error });
-  }
-
-};
-
-// Add an item to an order
-const addItemToOrder = async (req, res) => {
-  try {
-    const { productId, userId, quantity, price } = req.params;
-
-    // Find the order item by productId and userId
-    const orderItem = await OrderItem.findOne({ productId, userId });
-    if (!orderItem) {
-      // If the order item does not exist, create a new one
-      const newOrderItem = new OrderItem({
-        userId,
-        productId,
-        quantity,
-        price:price,
-        totalAmount :price*quantity
-      });
-
-      const savedOrderItem = await newOrderItem.save();
-      console.log('OrderItem created')
-      return res.status(201).json({ created: true, message: 'OrderItem created', orderItem: savedOrderItem });
-    } else {
-      // If the order item exists, update the quantity and total amount
-      orderItem.quantity += quantity;
-      orderItem.price = price;
-      orderItem.totalAmount  = price*quantity;
-
  
-      const updatedOrderItem = await orderItem.save();
-      console.log('OrderItem updated')
-      return res.status(200).json({ created: true, message: 'OrderItem updated', orderItem: updatedOrderItem });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error adding item to order', error });
-  }
-};
 
 // Get order items by productId and userId
 const getOrderItems = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Find order items by userId and populate the product details
-    const orderItems = await OrderItem.find({ userId }).populate('productId');
+    // Find order items by userId, where ordered is false, and populate the product details
+    const orderItems = await OrderItem.find({ userId, ordered: false }).populate('productId');
 
     if (!orderItems || orderItems.length === 0) {
       return res.status(404).json({ message: 'Order items not found' });
@@ -139,67 +114,26 @@ const getOrderItems = async (req, res) => {
   }
 };
 
-const incrementOrderItemQuantity = async (req, res) => {
-  try {
-    const { orderItemId } = req.params;
 
-   // const orderItem = await OrderItem.findOne({ orderItemId });
-   const orderItem = await OrderItem.findById(orderItemId);
-    console.log('oid',orderItem)
-    if (!orderItem) {
-      return res.status(404).json({ message: 'Order item not found' });
-    }
+ 
 
-    orderItem.quantity += 1;
-    orderItem.totalAmount =orderItem.price*orderItem.quantity
-    const updatedOrderItem = await orderItem.save();
-
-    res.status(200).json(updatedOrderItem);
-  } catch (error) {
-    res.status(500).json({ message: 'Error incrementing order item quantity', error });
-  }
-};
-
-const decrementOrderItemQuantity = async (req, res) => {
-  try {
-    const { orderItemId } = req.params;
-
-  //  const orderItem = await OrderItem.findOne({ orderItemId });
-  const orderItem = await OrderItem.findById(orderItemId);
-    console.log('oid',orderItem)
-
-    if (!orderItem) {
-      return res.status(404).json({ message: 'Order item not found' });
-    }
-
-    if (orderItem.quantity > 1) {
-      orderItem.quantity -= 1;
-      orderItem.totalAmount =orderItem.price*orderItem.quantity
-
-      const updatedOrderItem = await orderItem.save();
-      return res.status(200).json(updatedOrderItem);
-    } else {
-      return res.status(400).json({ message: 'Quantity cannot be less than 1' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error decrementing order item quantity', error });
-  }
-};
-
+ 
 // Delete Order Item
 const deleteOrderItem = async (req, res) => {
   try {
     const { orderItemId } = req.params;
-
+console.log('reached delt')
     // Find the order item by its ID and delete it
     const deletedOrderItem = await OrderItem.findByIdAndDelete(orderItemId);
 
     if (!deletedOrderItem) {
+      
       return res.status(404).json({ message: 'Order item not found' });
     }
 
     res.status(200).json({ message: 'Order item deleted successfully' });
   } catch (error) {
+    console.log('err',error)
     res.status(500).json({ message: 'Error deleting order item', error });
   }
 };
@@ -208,12 +142,7 @@ const deleteOrderItem = async (req, res) => {
 
 module.exports = {
   createOrder,
-  addItemToOrder,
-  removeItemFromOrder,
   getOrderItems,
-  handleBuyItem,
-  incrementOrderItemQuantity,
-  decrementOrderItemQuantity,
   deleteOrderItem,
 
   

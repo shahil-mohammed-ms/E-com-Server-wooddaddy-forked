@@ -8,6 +8,7 @@ const authRoutes = require('./authRoutes');
 const cartRoutes = require('./cartRoutes');
 const wishlistRoutes = require('./wishlistRoutes');
 const OrderRoutes = require('./orderRoutes');
+const addressRoutes = require('./addressRoutes')
 
 const router = express.Router();
 
@@ -20,6 +21,8 @@ router.use('/v1/auth', authRoutes);
 router.use('/v1/cart', cartRoutes);
 router.use('/v1/wishlist', wishlistRoutes);
 router.use('/v1/order', OrderRoutes);
+router.use('/v1/address', addressRoutes);
+
 
 
 
