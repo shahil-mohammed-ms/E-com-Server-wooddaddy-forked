@@ -5,51 +5,7 @@ const OrderItem = require('../models/orderItem');
 const mongoose = require('mongoose');
 const Product = require('../models/product')
 
-// Create a new order
-// const createOrder = async (req, res) => {
-//   console.log('req .body ',req.body)
-//   try {
-//     const { userId,addressId } = req.params
-//     const {  Totalamount, products } = req.body;
-//     console.log('req.cartdetails ',req.body[0].cartDetails)
-//     // Validate the address
-//     const addressExists = await Address.findById(addressId);
-//     if (!addressExists) {
-//       return res.status(404).json({ message: 'Address not found' });
-//     }
-
-//      let totalPrice = 0;
-//     for (const item of req.body) {
-//       const product = await Product.findById(item._id);
-//       console.log('ppppp',product)
-//       if (!product) {
-//         return res.status(404).json({ message: `Product with id ${item.product_id} not found` });
-//       }
-//        item.price = product.sale_rate;
-//       totalPrice += item.qty * product.sale_rate;
-//     }
-
-//      const newOrder = new Order({
-//       userId,
-//       payment_mode:'COD',
-//       Totalamount,
-//       address:addressId,
-//       products: {
-//         item: products.item,
-//         totalPrice
-//       },
-//       status: 'Placed',
-//       offer: req.body.offer || "None"
-//     });
-
-//      const savedOrder = await newOrder.save();
-
-//     res.status(201).json(savedOrder);
-//   } catch (error) {
-//     console.log('Error creating order:', error);
-//     res.status(500).json({ message: 'Error creating order', error });
-//   }
-// };
+ 
 const createOrder = async (req, res) => {
   try {
     const { userId, addressId } = req.params;
@@ -62,18 +18,7 @@ const {products } = req.body
 
     let totalPrice = 0;
     const items = [];
-    // for (const item of req.body) {
-    //   const product = await Product.findById(item._id);
-    //   if (!product) {
-    //     return res.status(404).json({ message: `Product with id ${item._id} not found` });
-    //   }
-    //   items.push({
-    //     product_id: product._id,
-    //     qty: item.qty,
-    //     price: product.sale_rate
-    //   });
-    //   totalPrice += item.qty * product.sale_rate;
-    // }
+    
 
     const newOrder = new Order({
       userId,
