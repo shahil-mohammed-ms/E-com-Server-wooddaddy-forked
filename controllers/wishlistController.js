@@ -2,18 +2,73 @@ const Wishlist = require('../models/wishlist');
 const Cart = require('../models/cart');
 const { ObjectId } = require('mongoose').Types;
 
-const getWishlist = async (req, res) => {
+// const getWishlist = async (req, res) => {
 
+//   try {
+//     const { userId,folderName } = req.params;
+//     const { page = 1, limit = 10, sortField, sortOrder, search, category,
+//       priceGreaterThan, priceLessThan, priceMin, priceMax,sortDiscount,sortDiscountGreaterThan   } = req.query;
+
+//     // Construct the base query
+//     const query = {};
+
+
+//     // Category filter
+
+//     // Sorting
+//     const sortOptions = {};
+//     if (sortField && sortOrder) {
+//       sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
+//     }
+
+
+
+//     // Find wishlist items with the provided userId and populate the product details
+//     const wishlistItems = await Wishlist.find({ userId,folderName })
+//     .populate('proId')
+//     .collation({ locale: 'en' }) // Enable case-insensitive search
+//       .sort(sortOptions)
+//       .skip((page - 1) * limit)
+//       .limit(Number(limit));
+
+//       console.log('wishlistItems:', wishlistItems);
+//       const productsWithData = await Promise.all(wishlistItems.map(async (product) => {
+//         console.log('product:', product);
+         
+//         const wishlistExists = await Wishlist.exists({ userId:new  ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
+//         const cartExists = await Cart.exists({ userId:new  ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
+  
+//         return {
+//            ...product.proId._doc,
+//           inWishlist: wishlistExists,
+//           inCart: cartExists,
+//         };
+//       }));
+//       console.log('productsWithData:', productsWithData);
+//       res.status(200).json({ products: productsWithData });
+
+ 
+// //     res.json({ products: wishlistItems });
+//   } catch (error) {
+//     console.log('errrr',error)
+//     res.status(500).json({ error: 'Could not retrieve wishlist items' });
+//   }
+// };
+
+const getWishlist = async (req, res) => {
   try {
-    const { userId,folderName } = req.params;
-    const { page = 1, limit = 10, sortField, sortOrder, search, category,
-      priceGreaterThan, priceLessThan, priceMin, priceMax,sortDiscount,sortDiscountGreaterThan   } = req.query;
+    const { userId, folderName } = req.params;
+    let { page = 1, limit = 10, sortField, sortOrder, search, category,
+      priceGreaterThan, priceLessThan, priceMin, priceMax, sortDiscount, sortDiscountGreaterThan } = req.query;
+
+    // Convert page and limit to integers
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 10;
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
 
     // Construct the base query
-    const query = {};
-
-
-    // Category filter
+    const query = { userId, folderName };
 
     // Sorting
     const sortOptions = {};
@@ -21,39 +76,39 @@ const getWishlist = async (req, res) => {
       sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
     }
 
-
+    // Find total count of wishlist items
+    const totalCount = await Wishlist.countDocuments(query);
 
     // Find wishlist items with the provided userId and populate the product details
-    const wishlistItems = await Wishlist.find({ userId,folderName })
-    .populate('proId')
-    .collation({ locale: 'en' }) // Enable case-insensitive search
+    const wishlistItems = await Wishlist.find(query)
+      .populate('proId')
+      .collation({ locale: 'en' }) // Enable case-insensitive search
       .sort(sortOptions)
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
 
-      console.log('wishlistItems:', wishlistItems);
-      const productsWithData = await Promise.all(wishlistItems.map(async (product) => {
-        console.log('product:', product);
-         
-        const wishlistExists = await Wishlist.exists({ userId:new  ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
-        const cartExists = await Cart.exists({ userId:new  ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
-  
-        return {
-           ...product.proId._doc,
-          inWishlist: wishlistExists,
-          inCart: cartExists,
-        };
-      }));
-      console.log('productsWithData:', productsWithData);
-      res.status(200).json({ products: productsWithData });
+    // Fetch wishlist and cart details for each product
+    const productsWithData = await Promise.all(wishlistItems.map(async (product) => {
+      const wishlistExists = await Wishlist.exists({ userId: new ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
+      const cartExists = await Cart.exists({ userId: new ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
 
- 
-//     res.json({ products: wishlistItems });
+      return {
+        ...product.proId._doc,
+        inWishlist: wishlistExists,
+        inCart: cartExists,
+      };
+    }));
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
+    res.status(200).json({ products: productsWithData, totalPages });
   } catch (error) {
-    console.log('errrr',error)
+    console.log('errrr', error);
     res.status(500).json({ error: 'Could not retrieve wishlist items' });
   }
 };
+
 
 const addWishlistItem = async (req, res) => {
   const { userId, proId,folderName } = req.params;

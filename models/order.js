@@ -2,11 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Define the OrderItem schema
-const OrderItemSchema = new Schema({
-  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-  quantity: { type: Number, required: true },
-  price: { type: Number, required: true }
-});
+
 
 // Define the Order schema
 const OrderSchema = new Schema({
@@ -21,7 +17,7 @@ const OrderSchema = new Schema({
       zip: { type: String, required: true },
     }
   },
-  items: [OrderItemSchema],
+  // items: [OrderItemSchema],
   totalAmount: { type: Number, required: true },
   status: { type: String, enum: ['pending', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },

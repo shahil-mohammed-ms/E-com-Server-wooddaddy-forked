@@ -19,7 +19,7 @@ router.use('/v1/advertisement', advertisementRoutes);
 router.use('/v1/auth', authRoutes);
 router.use('/v1/cart', cartRoutes);
 router.use('/v1/wishlist', wishlistRoutes);
-router.use('/v1/order', wishlistRoutes);
+router.use('/v1/order', OrderRoutes);
 
 
 
