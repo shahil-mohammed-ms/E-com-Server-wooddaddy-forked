@@ -44,7 +44,7 @@ const addressSchema = new mongoose.Schema({
     },
     primary: {
         type: Boolean,
-        default: false,
+        
         required: true
     }
 },

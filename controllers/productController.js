@@ -3,6 +3,7 @@ const Wishlist = require('../models/wishlist');
 const Cart = require('../models/cart');
 
 const getProduct = async (req, res) => {
+  
   const { proId } = req.params;
 
   try {
@@ -109,6 +110,8 @@ const getProduct = async (req, res) => {
 // };
 
 const getProducts = async (req, res) => {
+
+  console.log('get products reached ,')
   try {
     const { page = 1, limit = 3, sortField, sortOrder, search, category,
       priceGreaterThan, priceLessThan, priceMin, priceMax, sortDiscount, sortDiscountGreaterThan } = req.query;

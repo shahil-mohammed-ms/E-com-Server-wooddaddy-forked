@@ -1,15 +1,18 @@
 const Order = require('../models/order');
 const Address = require('../models/address');
-
+const Cart = require('../models/cart');
 const OrderItem = require('../models/orderItem');
 const mongoose = require('mongoose');
 const Product = require('../models/product')
+const User = require('../models/user')
 
  
 const createOrder = async (req, res) => {
   try {
     const { userId, addressId } = req.params;
 const {products } = req.body
+console.log(req.body)
+console.log(products)
     // Validate the address
     const addressExists = await Address.findById(addressId);
     if (!addressExists) {
@@ -32,6 +35,9 @@ const {products } = req.body
 
     const savedOrder = await newOrder.save();
 
+    const removedCart = await Cart.deleteMany({ userId });
+
+
     res.status(201).json(savedOrder);
   } catch (error) {
     console.log('Error creating order:', error);
@@ -39,14 +45,36 @@ const {products } = req.body
   }
 };
 
- 
+// get orders
+
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate({
+        path: 'userId',
+        model: User,
+        select: 'firstName lastName mail phone address'
+      })
+      .populate({
+        path: 'products.item.product_id',
+        model: Product,
+        select: 'name price'
+      })
+      .exec();
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.log('Error fetching orders:', error);
+    res.status(500).json({ message: 'Error fetching orders', error });
+  }
+};
+
 
 // Get order items by productId and userId
 const getOrderItems = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Find order items by userId, where ordered is false, and populate the product details
     const orderItems = await OrderItem.find({ userId, ordered: false }).populate('productId');
 
     if (!orderItems || orderItems.length === 0) {
@@ -67,7 +95,6 @@ const getOrderItems = async (req, res) => {
 const deleteOrderItem = async (req, res) => {
   try {
     const { orderItemId } = req.params;
-console.log('reached delt')
     // Find the order item by its ID and delete it
     const deletedOrderItem = await OrderItem.findByIdAndDelete(orderItemId);
 
@@ -89,6 +116,7 @@ module.exports = {
   createOrder,
   getOrderItems,
   deleteOrderItem,
+  getAllOrders,
 
   
 };

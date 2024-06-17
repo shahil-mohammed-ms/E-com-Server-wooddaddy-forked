@@ -1,8 +1,10 @@
 const { verify } = require("jsonwebtoken");
 
 const authorization = (req, res, next) => {
+  console.log('reached auuu')
   try {
     let token = req.headers.authorization;
+    console.log('tok',token)
     if (!token) {
       throw new Error("Token not found");
     }

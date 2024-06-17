@@ -8,6 +8,16 @@ const getCategory = async (req, res) => {
     console.log(error);
   }
 };
+const getSelectedCategory = async (req, res) => {
+  try {
+    const categories = await Category.find({ name: { $in: ["CHAIR", "SOFA","TABLE"] } });
+    res.status(200).json({ data: categories });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error retrieving categories" });
+  }
+};
+
 
 const addCategory = async (req, res) => {
   const { name, desc } = req?.body
@@ -21,7 +31,7 @@ const addCategory = async (req, res) => {
     const category = name.toUpperCase()
     const isExisting = arr.findIndex(x => x == category)
     if (isExisting === -1) {
-      const cat = new Category({ name, desc, image })
+      const cat = new Category({ name:name.toUpperCase(), desc, image })
       await cat.save()
       res.status(201).json({ data: cat, message: 'category created successfully' });
     } else {
@@ -53,4 +63,5 @@ module.exports = {
     getCategory,
     addCategory,
     deleteCategory,
+    getSelectedCategory,
   }
