@@ -95,7 +95,35 @@ const getOrderItems = async (req, res) => {
 
 
  
+//get order by id 
+const getOrderById= async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    // Find the order item by its ID and delete it
+    const OrderedDetails = await Order.findById(orderId)
+    .populate({
+      path: 'userId',
+      model: User,
+      select: 'firstName lastName mail phone address'
+    })
+    .populate({
+      path: 'products.item.product_id',
+      model: Product,
+      select: 'name price'
+    })
+    .exec();;
 
+    if (!OrderedDetails) {
+      
+      return res.status(404).json({ message: 'Order  not found' });
+    }
+
+    res.status(200).json({ message: 'Order found successfully',data:OrderedDetails });
+  } catch (error) {
+    console.log('err',error)
+    res.status(500).json({ message: 'Error deleting order item', error });
+  }
+};
  
 // Delete Order Item
 const deleteOrderItem = async (req, res) => {
@@ -123,6 +151,6 @@ module.exports = {
   getOrderItems,
   deleteOrderItem,
   getAllOrders,
-
+  getOrderById,
   
 };
