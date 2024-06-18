@@ -10,30 +10,36 @@ const User = require('../models/user')
 const createOrder = async (req, res) => {
   try {
     const { userId, addressId } = req.params;
-const {products } = req.body
-console.log(req.body)
-console.log(products)
+const {products,totalAmt } = req.body
+console.log('create order',products)
+console.log('totalAmt',totalAmt)
     // Validate the address
     const addressExists = await Address.findById(addressId);
     if (!addressExists) {
       return res.status(404).json({ message: 'Address not found' });
     }
-
-    let totalPrice = 0;
-    const items = [];
+ 
     
 
     const newOrder = new Order({
       userId,
       payment_mode: 'COD',
-      Totalamount:10,
+      Totalamount:totalAmt.totalPrice,
       address: addressId,
       products,
       status: 'Placed',
       offer: req.body.offer || "None"
     });
-
+  
     const savedOrder = await newOrder.save();
+
+    for (const item of products.item) {
+      const product = await Product.findById(item.product_id);
+      if (product) {
+        product.stock -= item.qty;
+        await product.save();
+      }
+    }
 
     const removedCart = await Cart.deleteMany({ userId });
 
