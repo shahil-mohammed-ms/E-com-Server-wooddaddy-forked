@@ -70,6 +70,8 @@ const getWishlist = async (req, res) => {
     // Construct the base query
     const query = { userId, folderName };
 
+    console.log('usr id',userId)
+
     // Sorting
     const sortOptions = {};
     if (sortField && sortOrder) {
@@ -89,8 +91,8 @@ const getWishlist = async (req, res) => {
 
     // Fetch wishlist and cart details for each product
     const productsWithData = await Promise.all(wishlistItems.map(async (product) => {
-      const wishlistExists = await Wishlist.exists({ userId: new ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
-      const cartExists = await Cart.exists({ userId: new ObjectId('664db80748eeadcd76759a55'), proId: product.proId._id });
+      const wishlistExists = await Wishlist.exists({ userId: new ObjectId(userId), proId: product.proId._id });
+      const cartExists = await Cart.exists({ userId: new ObjectId(userId), proId: product.proId._id });
 
       return {
         ...product.proId._doc,
@@ -101,7 +103,7 @@ const getWishlist = async (req, res) => {
 
     // Calculate total pages
     const totalPages = Math.ceil(totalCount / limitNumber);
-
+console.log(productsWithData)
     res.status(200).json({ products: productsWithData, totalPages });
   } catch (error) {
     console.log('errrr', error);

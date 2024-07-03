@@ -41,7 +41,7 @@ console.log('totalAmt',totalAmt)
       }
     }
 
-    const removedCart = await Cart.deleteMany({ userId });
+    const removedCart = await Cart.deleteMany({ userId }); 
 
 
     res.status(201).json(savedOrder);
